@@ -46,9 +46,15 @@ function App() {
 }
 
 function SignIn() {
-  const signInWithGoogle = () => {
+  const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider);
+    try {
+      await signInWithPopup(auth, provider);
+      console.log("User signed in");
+    } catch (error) {
+      console.error("Error during sign-in", error);
+      alert("Error during sign-in. Please try again.");
+    }
   };
 
   return (
@@ -58,6 +64,7 @@ function SignIn() {
     </>
   );
 }
+
 
 function SignOut() {
   return auth.currentUser && (
