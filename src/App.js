@@ -4,10 +4,7 @@ import './App.css';
 // Firebase imports
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, query, orderBy, limit, addDoc, serverTimestamp } from 'firebase/firestore';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { getAnalytics } from 'firebase/analytics';
-
-// Firebase hooks
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 
@@ -18,24 +15,33 @@ const firebaseConfig = {
   projectId: "superchat-cfc50",
   storageBucket: "superchat-cfc50.appspot.com",
   messagingSenderId: "886466090729",
-  appId: "1:886466090729:web:90c0987c7bfb92b7b8c278",
-  measurementId: "G-EW8DX9R15S"
+  appId: "1:886466090729:web:90c0987c7bfb92b7b8c278"
 };
 
 // Initialize Firebase services
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
-const analytics = getAnalytics(app);
 
 function App() {
   const [user] = useAuthState(auth);
+
+  // Copy all page content
+  const copyPageContent = () => {
+    const pageContent = document.body.innerText;
+    navigator.clipboard.writeText(pageContent).then(() => {
+      alert("Page content copied to clipboard!");
+    }).catch(err => {
+      alert("Failed to copy content. Error: " + err);
+    });
+  };
 
   return (
     <div className="App">
       <header>
         <h1>⚛️🔥💬 SuperChat</h1>
         <SignOut />
+        <button className="copy-button" onClick={copyPageContent}>Copy Page Content</button>
       </header>
 
       <section>
@@ -46,6 +52,11 @@ function App() {
 }
 
 function SignIn() {
+  // Email sign-in states
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // Google sign-in
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
@@ -57,14 +68,58 @@ function SignIn() {
     }
   };
 
+  // Email sign-in
+  const signInWithEmail = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log("Signed in with email");
+    } catch (error) {
+      console.error("Error during email sign-in", error);
+      alert("Error signing in with email. Please try again.");
+    }
+  };
+
+  // Email account creation
+  const registerWithEmail = async () => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Account created");
+    } catch (error) {
+      console.error("Error during account creation", error);
+      alert("Error creating account. Please try again.");
+    }
+  };
+
   return (
-    <>
-      <button className="sign-in" onClick={signInWithGoogle}>Sign in with Google</button>
-      <p>Do not violate the community guidelines or you will be banned for life!</p>
-    </>
+    <div className="auth-container">
+      <button className="sign-in google-btn" onClick={signInWithGoogle}>Sign in with Google</button>
+
+      <div className="email-signin">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          className="auth-input"
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          className="auth-input"
+        />
+
+        <div className="auth-buttons">
+          <button className="sign-in email-btn" onClick={signInWithEmail}>Sign in with Email</button>
+          <button className="sign-in email-btn" onClick={registerWithEmail}>Register with Email</button>
+        </div>
+      </div>
+
+      <p className="guidelines-text">Do not violate the community guidelines or you will be banned for life!</p>
+    </div>
   );
 }
-
 
 function SignOut() {
   return auth.currentUser && (
