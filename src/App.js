@@ -52,42 +52,30 @@ function App() {
 }
 
 function SignIn() {
-  // Email sign-in states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Google sign-in
+  const googleAuthUrl = "https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?response_type=code&client_id=886466090729-7jo0ga9nqcpknnqp8ggbsqp5i24rjfhc.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fsuperchat-cfc50.firebaseapp.com%2F__%2Fauth%2Fhandler&state=AMbdmDnxYgckxN5ApQqLd18lmjFfkPZg2YqHtFRk9ycTXw8apOtyPT7-5mRXdUPFOHPMXPlc3akZKi21nXqRTQz-w5FV6HZ-vKL_-0Jf5j5JWOfvXUXsyTlVyOmptKO5gGRwjW7e3wLk7pU1wMM9Td5eCeL68MBh6XJ0Ai-vB9oqGO9aqPGgd-buydxIdyD3iYGBHBxiiY20WA5wnccj7zekrCMeCdoY2kNMA8vG8XDtV5RDyqAnnF5Zxpc_fyo9xZIv-9FmhmWNXvUpM6QB1DVR9EwyLxfDFoHn5napAbuWZ7Jglxh2w9g2LQkjRxLWN-e3IB1BXRxf1Q&scope=openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20profile&context_uri=http%3A%2F%2Flocalhost%3A3000&service=lso&o2v=1&ddm=0&flowName=GeneralOAuthFlow";
+
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      console.log("User signed in");
     } catch (error) {
       console.error("Error during sign-in", error);
       alert("Error during sign-in. Please try again.");
     }
   };
+  
 
-  // Email sign-in
-  const signInWithEmail = async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      console.log("Signed in with email");
-    } catch (error) {
-      console.error("Error during email sign-in", error);
-      alert("Error signing in with email. Please try again.");
-    }
+  const signInWithEmail = async (e) => {
+    e.preventDefault();
+    // Add your logic to sign in with email using Firebase
   };
 
-  // Email account creation
-  const registerWithEmail = async () => {
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      console.log("Account created");
-    } catch (error) {
-      console.error("Error during account creation", error);
-      alert("Error creating account. Please try again.");
-    }
+  const registerWithEmail = async (e) => {
+    e.preventDefault();
+    // Add your logic to register a new user with email using Firebase
   };
 
   return (
@@ -95,32 +83,35 @@ function SignIn() {
       <button className="sign-in google-btn" onClick={signInWithGoogle}>Sign in with Google</button>
 
       <div className="email-signin">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          className="auth-input"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="auth-input"
-        />
+        <form onSubmit={signInWithEmail}>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            className="auth-input"
+            required
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            className="auth-input"
+            required
+          />
 
-        <div className="auth-buttons">
-          <button className="sign-in email-btn" onClick={signInWithEmail}>Sign in with Email</button>
-          <button className="sign-in email-btn" onClick={registerWithEmail}>Register with Email</button>
-        </div>
+          <div className="auth-buttons">
+            <button type="submit" className="sign-in email-btn">Sign in with Email</button>
+            <button type="button" onClick={registerWithEmail} className="sign-in email-btn">Register with Email</button>
+          </div>
+        </form>
       </div>
 
       <p className="guidelines-text">Do not violate the community guidelines or you will be banned for life!</p>
     </div>
   );
 }
-
 function SignOut() {
   return auth.currentUser && (
     <button className="sign-out" onClick={() => signOut(auth)}>
